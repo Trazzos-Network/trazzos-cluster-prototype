@@ -702,6 +702,9 @@ interface ValidationWarning {
 // EXPORTS - Todo el modelo de datos
 // ============================================================================
 
+// Export enums as values (not types) so they can be used at runtime
+export { Criticidad, EstadoSinergia, AccionSugerida, UnidadMedida };
+
 export type {
   // Domain types
   ParadaId,
@@ -710,12 +713,6 @@ export type {
   OfertaId,
   PONumber,
   UserId,
-
-  // Enums
-  Criticidad,
-  EstadoSinergia,
-  AccionSugerida,
-  UnidadMedida,
 
   // Base entities
   ParadaProgramada,

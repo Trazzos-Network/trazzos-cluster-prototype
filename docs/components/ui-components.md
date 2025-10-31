@@ -8,6 +8,77 @@ This project uses [shadcn/ui](https://ui.shadcn.com), a collection of re-usable 
 
 The following components are currently installed and ready to use:
 
+### Navigation Components
+
+#### Sidebar
+
+**Location**: `components/ui/sidebar.tsx`
+
+A collapsible navigation sidebar with icon mode support.
+
+**Sub-components**:
+
+- `Sidebar`: Root container with collapsible functionality
+- `SidebarProvider`: Context provider for sidebar state
+- `SidebarTrigger`: Button to toggle sidebar
+- `SidebarContent`: Main content area
+- `SidebarHeader`: Top section (optional)
+- `SidebarFooter`: Bottom section (optional)
+- `SidebarGroup`: Group of related items
+- `SidebarGroupLabel`: Label for a group
+- `SidebarGroupContent`: Content container for groups
+- `SidebarMenu`: Menu container
+- `SidebarMenuItem`: Individual menu item
+- `SidebarMenuButton`: Button for menu items
+
+**Usage**:
+
+```typescript
+import {
+  Sidebar,
+  SidebarProvider,
+  SidebarTrigger,
+  SidebarContent,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+} from "@/components/ui/sidebar";
+
+export default function Layout({ children }) {
+  return (
+    <SidebarProvider>
+      <Sidebar collapsible="icon">
+        <SidebarContent>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link href="/home">Home</Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarContent>
+      </Sidebar>
+      <main>
+        <SidebarTrigger />
+        {children}
+      </main>
+    </SidebarProvider>
+  );
+}
+```
+
+**Features**:
+
+- Collapsible to icon-only mode
+- Responsive behavior
+- State management via context
+- Smooth animations
+- Keyboard accessible
+
+---
+
+### Form & Input Components
+
 ### 1. Button
 
 **Location**: `components/ui/button.tsx`
@@ -575,7 +646,58 @@ All components automatically support dark mode through CSS variables. No additio
 - [Radix UI Documentation](https://www.radix-ui.com/docs)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
 
+## Additional Components
+
+The following components were added with the sidebar installation:
+
+### Sheet
+
+**Location**: `components/ui/sheet.tsx`
+
+A slide-out panel component (used internally by sidebar).
+
+### Tooltip
+
+**Location**: `components/ui/tooltip.tsx`
+
+Displays additional information on hover or focus.
+
+**Usage**:
+
+```typescript
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+<TooltipProvider>
+  <Tooltip>
+    <TooltipTrigger>Hover me</TooltipTrigger>
+    <TooltipContent>
+      <p>Additional information</p>
+    </TooltipContent>
+  </Tooltip>
+</TooltipProvider>;
+```
+
+### Skeleton
+
+**Location**: `components/ui/skeleton.tsx`
+
+Loading placeholder component.
+
+**Usage**:
+
+```typescript
+import { Skeleton } from "@/components/ui/skeleton";
+
+<Skeleton className="h-12 w-12 rounded-full" />;
+<Skeleton className="h-4 w-[250px]" />;
+```
+
 ---
 
 **Last Updated**: October 31, 2025  
-**Total Components**: 14
+**Total Components**: 18 (14 core + 4 supporting components)

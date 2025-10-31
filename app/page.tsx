@@ -1,8 +1,16 @@
+import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,13 +21,20 @@ export default function Home() {
       <header className="border-b">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <h1 className="text-2xl font-bold">Trazzos Cluster</h1>
-          <ThemeToggle />
+          <div className="flex items-center gap-4">
+            <Button asChild variant="outline">
+              <Link href="/home">Dashboard</Link>
+            </Button>
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h2 className="mb-2 text-4xl font-bold">Welcome to your Next.js App</h2>
+          <h2 className="mb-2 text-4xl font-bold">
+            Welcome to your Next.js App
+          </h2>
           <p className="text-lg text-muted-foreground">
             with shadcn/ui components and dark mode support
           </p>
@@ -44,7 +59,9 @@ export default function Home() {
               <Card>
                 <CardHeader>
                   <CardTitle>Button Variants</CardTitle>
-                  <CardDescription>Different button styles available</CardDescription>
+                  <CardDescription>
+                    Different button styles available
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-2">
                   <Button>Default</Button>
@@ -71,7 +88,9 @@ export default function Home() {
               <Card>
                 <CardHeader>
                   <CardTitle>Badge Variants</CardTitle>
-                  <CardDescription>Status indicators and labels</CardDescription>
+                  <CardDescription>
+                    Status indicators and labels
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-2">
                   <Badge>Default</Badge>
@@ -87,7 +106,9 @@ export default function Home() {
             <Card className="max-w-md">
               <CardHeader>
                 <CardTitle>Contact Form</CardTitle>
-                <CardDescription>Fill out the form below to get in touch</CardDescription>
+                <CardDescription>
+                  Fill out the form below to get in touch
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -96,7 +117,11 @@ export default function Home() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="Enter your email" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Enter your email"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="message">Message</Label>
@@ -115,7 +140,8 @@ export default function Home() {
             <CardHeader>
               <CardTitle>Installed Components</CardTitle>
               <CardDescription>
-                The following shadcn/ui components are installed and ready to use
+                The following shadcn/ui components are installed and ready to
+                use
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -136,7 +162,11 @@ export default function Home() {
                   "Separator",
                   "Sonner (Toast)",
                 ].map((component) => (
-                  <Badge key={component} variant="outline" className="justify-center py-2">
+                  <Badge
+                    key={component}
+                    variant="outline"
+                    className="justify-center py-2"
+                  >
                     {component}
                   </Badge>
                 ))}
