@@ -9,10 +9,17 @@ Welcome to the comprehensive documentation for the Trazzos Cluster Prototype pro
 - [System Overview](./architecture/overview.md)
 - [Technology Stack](./architecture/tech-stack.md)
 - [Architecture Decision Records](./architecture/decisions/)
+  - [ADR-001: Use pnpm as Package Manager](./architecture/decisions/001-package-manager.md)
+  - [ADR-002: Use Route Groups for Dashboard](./architecture/decisions/002-dashboard-route-groups.md)
+  - [ADR-003: Synergies Visualization System](./architecture/decisions/003-synergies-visualization.md)
 
 ### ✨ Features
 
 - [Theme System (Dark/Light Mode)](./features/theme-system.md)
+- [Dashboard System](./features/dashboard-system.md)
+- [Cluster Dashboard - Sistema Multiview](./features/cluster-dashboard-multiview.md)
+- **[Synergies Visualization](./features/synergies-visualization.md)** - Interactive force-directed graph
+- [Implementation Summary](./IMPLEMENTATION_SUMMARY.md) - Latest development status
 
 ### 🔌 API
 
