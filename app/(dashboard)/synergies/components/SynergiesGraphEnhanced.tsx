@@ -225,7 +225,7 @@ export function SynergiesGraphEnhanced({
       <div className="space-y-4">
         {/* Controls */}
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <Badge variant="outline">
@@ -304,6 +304,22 @@ export function SynergiesGraphEnhanced({
                 className="absolute inset-0"
               >
                 <defs>
+                  {/* Dotted grid pattern */}
+                  <pattern
+                    id="dottedGrid"
+                    width="20"
+                    height="20"
+                    patternUnits="userSpaceOnUse"
+                  >
+                    <circle
+                      cx="1"
+                      cy="1"
+                      r="1"
+                      fill="var(--color-muted-foreground)"
+                      opacity="0.15"
+                    />
+                  </pattern>
+
                   <filter id="glow">
                     <feGaussianBlur stdDeviation="3" result="coloredBlur" />
                     <feMerge>
@@ -319,6 +335,14 @@ export function SynergiesGraphEnhanced({
                     </feMerge>
                   </filter>
                 </defs>
+
+                {/* Background with dotted grid pattern */}
+                <rect
+                  width="100%"
+                  height="100%"
+                  fill="var(--color-background)"
+                />
+                <rect width="100%" height="100%" fill="url(#dottedGrid)" />
 
                 <g
                   transform={`translate(${dimensions.width / 2}, ${
@@ -350,7 +374,7 @@ export function SynergiesGraphEnhanced({
                           stroke={edgeColor}
                           strokeWidth={
                             edge.type === "company-synergy"
-                              ? Math.sqrt(edge.value) * 2
+                              ? Math.sqrt(edge.value / 20) * 2
                               : 1
                           }
                           strokeOpacity={0.6}
@@ -542,7 +566,7 @@ function NodeRenderer({
               cy={position.y}
               r={companyRadius}
               fill="var(--color-card)"
-              stroke={!isSelected ? "var(--color-dataviz-1)" : node.color}
+              stroke={isSelected ? "var(--color-dataviz-1)" : node.color}
               strokeWidth={isSelected ? 3 : 2}
               strokeDasharray={isSelected ? "none" : "8 4"}
               filter={isHovered ? "url(#glow)" : undefined}
@@ -554,7 +578,7 @@ function NodeRenderer({
               dy="0.35em"
               fontSize="12"
               fontWeight="600"
-              fill={!isSelected ? "var(--color-dataviz-1)" : node.color}
+              fill={isSelected ? "var(--color-dataviz-1)" : node.color}
             >
               {node.name.split(" ")[0]}
             </text>
@@ -604,9 +628,9 @@ function NodeRenderer({
             <path
               d={hexPath}
               transform={`translate(${position.x}, ${position.y})`}
-              fill="var(--color-background)"
+              fill="var(--color-card)"
               stroke={
-                !isSelected ? "var(--color-dataviz-4)" : ESTADO_COLORS[estado]
+                isSelected ? "var(--color-dataviz-4)" : ESTADO_COLORS[estado]
               }
               strokeWidth={isSelected ? 3 : estado === "pendiente" ? 2 : 2.5}
               strokeDasharray={

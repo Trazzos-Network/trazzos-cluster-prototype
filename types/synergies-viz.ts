@@ -90,6 +90,40 @@ export interface SwimLane {
 }
 
 // ============================================================================
+// TIMELINE EVENTS & MILESTONES
+// ============================================================================
+
+export type TimelineEventType =
+  | "detection"
+  | "rfp_emission"
+  | "rfp_closing"
+  | "rfp_decision"
+  | "committee_decision"
+  | "po_emission"
+  | "update"
+  | "delivery_window";
+
+export interface TimelineEvent {
+  id: string;
+  sinergiaId: string;
+  type: TimelineEventType;
+  date: Date;
+  label: string;
+  description?: string;
+  empresa?: string;
+  insumo: string;
+  estado?: EstadoSinergia;
+  // Additional metadata
+  metadata?: {
+    rfp_id?: string;
+    proveedor?: string;
+    monto?: number;
+    po_numero?: string;
+    accion?: string;
+  };
+}
+
+// ============================================================================
 // INTERACTION STATE
 // ============================================================================
 
@@ -166,12 +200,12 @@ export interface Bounds {
 
 // CSS variable references for SVG (use Tailwind's color variable format)
 export const ESTADO_COLORS: Record<EstadoSinergia, string> = {
-  pendiente: "var(--color-primary)",
-  en_rfp: "var(--color-primary)",
-  recomendada: "var(--color-primary)",
-  aprobada: "var(--color-primary)",
-  contraoferta: "var(--color-primary)",
-  cerrada: "var(--color-primary)",
+  pendiente: "var(--color-dataviz-5)",
+  en_rfp: "var(--color-dataviz-4)",
+  recomendada: "var(--color-dataviz-3)",
+  aprobada: "var(--color-dataviz-0)",
+  contraoferta: "var(--color-dataviz-1)",
+  cerrada: "var(--color-dataviz-1)",
   rechazada: "var(--color-destructive)",
 };
 

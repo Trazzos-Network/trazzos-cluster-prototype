@@ -88,7 +88,10 @@ export function SynergyBlock({
             {block.volumen} {block.unidad}
           </div>
           {block.ahorro && (
-            <div className="text-[10px] text-[var(--color-chart-3)] font-medium mt-0.5">
+            <div
+              className="text-[10px] font-medium mt-0.5"
+              style={{ color: "var(--color-chart-3)" }}
+            >
               $
               {block.ahorro.toLocaleString("es-CO", {
                 style: "currency",

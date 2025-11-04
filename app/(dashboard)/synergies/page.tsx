@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { SAMPLE_OUTPUT } from "@/data/sample_data";
+import { COMPREHENSIVE_SAMPLE_2026_H1 as SAMPLE_OUTPUT } from "@/data/sample_data_extended";
 import { SynergiesGraphEnhanced } from "./components/SynergiesGraphEnhanced";
 import { TimelineView } from "./components/TimelineView";
 import { TopBar } from "./components/TopBar";
