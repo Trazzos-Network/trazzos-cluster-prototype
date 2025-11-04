@@ -22,8 +22,6 @@ interface MaintenancePeriodBlockProps {
  * Maintenance period block component - horizontal rectangle showing maintenance window
  */
 export function MaintenancePeriodBlock({
-  id,
-  empresa,
   start,
   end,
   position,
@@ -31,7 +29,6 @@ export function MaintenancePeriodBlock({
   laneHeight,
   planta,
   unidad,
-  criticidad,
 }: MaintenancePeriodBlockProps) {
   const blockHeight = Math.min(laneHeight - 8, 60);
   const blockY = (laneHeight - blockHeight) / 2;

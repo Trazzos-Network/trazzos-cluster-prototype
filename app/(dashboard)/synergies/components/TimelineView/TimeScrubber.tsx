@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -32,12 +32,7 @@ export function TimeScrubber({
     (currentDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24);
   const position = (daysFromStart / totalDays) * timelineWidth;
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    handleMove(e);
-  };
-
-  const handleMove = (e: React.MouseEvent | MouseEvent) => {
+  const handleMove = useCallback((e: React.MouseEvent | MouseEvent) => {
     if (!isDragging) return;
 
     const rect =
@@ -55,11 +50,16 @@ export function TimeScrubber({
     );
 
     onDateChange(newDate);
-  };
+  }, [isDragging, timelineWidth, totalDays, minDate, onDateChange]);
 
-  const handleMouseUp = () => {
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    setIsDragging(true);
+    handleMove(e);
+  }, [handleMove]);
+
+  const handleMouseUp = useCallback(() => {
     setIsDragging(false);
-  };
+  }, []);
 
   React.useEffect(() => {
     if (isDragging) {
@@ -70,7 +70,7 @@ export function TimeScrubber({
         document.removeEventListener("mouseup", handleMouseUp);
       };
     }
-  }, [isDragging]);
+  }, [isDragging, handleMove, handleMouseUp]);
 
   return (
     <div

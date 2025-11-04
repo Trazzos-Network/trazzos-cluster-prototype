@@ -29,7 +29,7 @@ export function MiniMap({
   nodes,
   positions,
   viewport,
-  dimensions,
+  dimensions: _dimensions, // eslint-disable-line @typescript-eslint/no-unused-vars
   onViewportChange,
   miniMapSize = 200,
 }: MiniMapProps) {

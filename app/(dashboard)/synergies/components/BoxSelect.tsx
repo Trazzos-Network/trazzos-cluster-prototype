@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Position } from "@/types/synergies-viz";
 
 interface BoxSelectProps {
@@ -102,7 +102,15 @@ export function BoxSelect({
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [enabled, isSelecting, startPos, currentPos, onSelect, onSelectionEnd]);
+  }, [
+    enabled,
+    isSelecting,
+    startPos,
+    currentPos,
+    onSelect,
+    onSelectionEnd,
+    containerRef,
+  ]);
 
   if (!isSelecting || !startPos || !currentPos) return null;
 

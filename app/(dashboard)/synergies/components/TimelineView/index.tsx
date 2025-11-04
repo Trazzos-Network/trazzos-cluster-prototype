@@ -69,10 +69,8 @@ const EVENT_TYPE_LABELS: Record<string, string> = {
 export function TimelineView({ sinergias, onBlockClick }: TimelineViewProps) {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [scrollTop, setScrollTop] = useState(0);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [focusedDate, setFocusedDate] = useState<Date | null>(null);
-  const [hoveredBlock, setHoveredBlock] = useState<TimelineBlock | null>(null);
   const [hoveredEvent, setHoveredEvent] = useState<TimelineEvent | null>(null);
   const [selectedEventTypes, setSelectedEventTypes] = useState<string[]>([]);
   const [showEventFilters, setShowEventFilters] = useState(false);
@@ -157,10 +155,6 @@ export function TimelineView({ sinergias, onBlockClick }: TimelineViewProps) {
       }))
       .filter((lane) => lane.blocks.length > 0);
   }, [swimLanes, filteredBlocks, focusedDate]);
-
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    setScrollTop(e.currentTarget.scrollTop);
-  };
 
   const totalHeight = swimLanes.length * LANE_HEIGHT;
 
@@ -280,7 +274,6 @@ export function TimelineView({ sinergias, onBlockClick }: TimelineViewProps) {
           ref={containerRef}
           className="relative w-full overflow-y-auto overflow-x-hidden"
           style={{ height: "calc(100vh - 300px)", minHeight: 600 }}
-          onScroll={handleScroll}
         >
           {/* Time Axis - Master reference for all timeline positioning */}
           <div className="sticky top-0 z-20 bg-background border-b">
@@ -327,7 +320,7 @@ export function TimelineView({ sinergias, onBlockClick }: TimelineViewProps) {
             className="relative"
             style={{ minHeight: totalHeight, marginTop: EVENT_TRACK_HEIGHT }}
           >
-            {filteredSwimLanes.map((lane, index) => {
+            {filteredSwimLanes.map((lane) => {
               const maintenancePeriods =
                 maintenancePeriodsByCompany.get(lane.empresa) || [];
               const periodsWithIds = maintenancePeriods.map((period, idx) => ({
@@ -348,7 +341,7 @@ export function TimelineView({ sinergias, onBlockClick }: TimelineViewProps) {
                   timelineWidth={timelineWidth}
                   scrollLeft={0}
                   onBlockClick={handleBlockClick}
-                  onBlockHover={setHoveredBlock}
+                  onBlockHover={() => {}}
                 />
               );
             })}

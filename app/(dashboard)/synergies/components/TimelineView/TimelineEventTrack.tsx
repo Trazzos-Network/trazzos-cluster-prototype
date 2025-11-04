@@ -4,7 +4,6 @@ import { useMemo } from "react";
 import { TimelineEvent } from "@/types/synergies-viz";
 import { TimelineMilestone } from "./TimelineMilestone";
 import { calculateDatePosition } from "@/lib/synergies/timeline-utils";
-import { getTimelineDateRange } from "@/lib/synergies/timeline-utils";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -66,7 +65,7 @@ export function TimelineEventTrack({
       stackIndex: number;
     }> = [];
 
-    for (const [dateKey, dateEvents] of eventsByDate.entries()) {
+    for (const dateEvents of eventsByDate.values()) {
       // Stack overlapping events vertically
       dateEvents.forEach((event, index) => {
         // Use the actual event date for positioning, not the rounded date key
@@ -104,7 +103,7 @@ export function TimelineEventTrack({
         style={{ paddingLeft: 200 }}
       >
         {/* Render milestones */}
-        {eventPositions.map(({ event, position, stackIndex }) => (
+        {eventPositions.map(({ event, position }) => (
           <TimelineMilestone
             key={event.id}
             event={event}
@@ -116,7 +115,7 @@ export function TimelineEventTrack({
 
         {/* Event count badges for dates with multiple events */}
         {Array.from(eventsByDate.entries())
-          .filter(([_, events]) => events.length > 1)
+          .filter(([, events]) => events.length > 1)
           .map(([dateKey, dateEvents]) => {
             // Use the first event's date for positioning the badge
             const firstEventDate = dateEvents[0]!.date;

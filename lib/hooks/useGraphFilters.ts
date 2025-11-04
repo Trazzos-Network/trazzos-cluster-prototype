@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { SinergiaDetectada, EstadoSinergia, Criticidad } from "@/types/models";
+import { SinergiaDetectada } from "@/types/models";
 import { FilterState } from "@/types/synergies-viz";
 import { GraphNode, GraphEdge } from "@/types/synergies-viz";
 

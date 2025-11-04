@@ -4,7 +4,6 @@ import { useState, useMemo, useEffect } from "react";
 import {
   SinergiaDetectada,
   OfertaProveedor,
-  ScoringOferta,
   EvaluacionRFP,
   OfertaId,
   UserId,
@@ -19,7 +18,6 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import {
   Card,
   CardContent,
@@ -44,10 +42,8 @@ import {
   TrendingUp,
   X,
   Save,
-  CheckCircle,
   AlertCircle,
 } from "lucide-react";
-import { formatCurrency } from "@/lib/synergies/calculations";
 
 interface OfferEvaluationPanelProps {
   synergy: SinergiaDetectada;

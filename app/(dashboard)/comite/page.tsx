@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useCallback } from "react";
 import {
-  EstadoSinergia,
   RFPConjunta,
   DecisionComite,
   PONumber,
@@ -31,19 +30,13 @@ import {
   CheckCircle,
   XCircle,
   FileText,
-  TrendingUp,
-  DollarSign,
-  Users,
-  Calendar,
   Link2,
   Loader2,
   CheckCircle2,
-  AlertCircle,
   Package,
 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { formatCurrency } from "@/lib/synergies/calculations";
 import {
   Dialog,
   DialogContent,

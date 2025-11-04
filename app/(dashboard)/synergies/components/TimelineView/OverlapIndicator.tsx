@@ -18,7 +18,6 @@ export function OverlapIndicator({
   overlap,
   position,
   swimLanes,
-  totalHeight,
 }: OverlapIndicatorProps) {
   const laneIndices = overlap.empresas
     .map((empresa) => {

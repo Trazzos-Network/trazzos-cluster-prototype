@@ -26,7 +26,6 @@ import {
   ArrowLeft,
   Building,
   Calendar,
-  DollarSign,
   FileText,
   Mail,
   Package,
@@ -66,7 +65,7 @@ export default function SynergyDetailPage() {
         rfpId: synergy.rfp?.rfp_id,
       });
     }
-  }, [evaluationPanelOpen, hasRFP, synergy?.id, synergy?.rfp]);
+  }, [evaluationPanelOpen, hasRFP, synergy]);
 
   if (!synergy) {
     return (

@@ -38,7 +38,6 @@ import {
   Package,
   TrendingUp,
   Users,
-  X,
 } from "lucide-react";
 
 interface SynergyDetailPanelProps {

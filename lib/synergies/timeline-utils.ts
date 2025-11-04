@@ -1,16 +1,13 @@
-import { SinergiaDetectada, EstadoSinergia, Criticidad } from "@/types/models";
+import { SinergiaDetectada } from "@/types/models";
 import {
   TimelineBlock,
   SwimLane,
-  OverlapIndicator,
   COMPANY_COLORS,
 } from "@/types/synergies-viz";
 import {
-  format,
   startOfMonth,
   endOfMonth,
   addMonths,
-  differenceInDays,
 } from "date-fns";
 
 /**

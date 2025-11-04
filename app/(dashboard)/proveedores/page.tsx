@@ -13,7 +13,6 @@ import { SAMPLE_OUTPUT } from "@/data/sample_data";
 import {
   Building2,
   Search,
-  TrendingUp,
   Package,
   CheckCircle,
 } from "lucide-react";
