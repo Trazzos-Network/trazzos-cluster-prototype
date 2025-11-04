@@ -5,6 +5,7 @@ import {
   GraphEdge,
   Position,
   Dimensions,
+  SynergyNode,
 } from "@/types/synergies-viz";
 
 // Type for D3 simulation nodes (GraphNode with added D3 properties)
@@ -113,7 +114,9 @@ export function useForceSimulation(
             if (node.type === "company") {
               radius = 70 + collisionPadding;
             } else if (node.type === "synergy") {
-              radius = ((node as any).radius || 40) + collisionPadding;
+              // SynergyNode has a radius property
+              const synergyNode = node as SynergyNode;
+              radius = (synergyNode.radius || 40) + collisionPadding;
             } else {
               radius = 35 + collisionPadding;
             }

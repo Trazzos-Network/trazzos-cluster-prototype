@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { SinergiaDetectada } from "@/types/models";
 import {
   transformToGraphData,
@@ -54,6 +55,7 @@ export function SynergiesGraphEnhanced({
   showMiniMap = false,
   onCompare,
 }: SynergiesGraphProps) {
+  const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState<Dimensions>({
     width: 1200,
@@ -174,7 +176,13 @@ export function SynergiesGraphEnhanced({
       return;
     }
 
-    // Normal click
+    // Normal click - navigate to detail page for synergies
+    if (node.type === "synergy") {
+      router.push(`/synergies/${encodeURIComponent(node.data.id)}`);
+      return;
+    }
+
+    // For other node types, keep the selection behavior
     if (selectedNodes.has(node.id)) {
       // Deselect if already selected
       setSelectedNodes((prev) => {
@@ -189,10 +197,6 @@ export function SynergiesGraphEnhanced({
       // Single select (clear multi-select)
       setSelectedNode(node.id);
       setSelectedNodes(new Set([node.id]));
-      if (node.type === "synergy") {
-        setSelectedSynergy(node.data);
-        setDetailPanelOpen(true);
-      }
     }
   };
 

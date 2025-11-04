@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useMemo } from "react";
+import { useMotionValue, animate } from "framer-motion";
+import { useMemo, useEffect, useState } from "react";
 import { Criticidad } from "@/types/models";
 
 interface FlowingParticlesProps {
@@ -9,6 +9,65 @@ interface FlowingParticlesProps {
   color: string;
   criticidad?: Criticidad;
   enabled?: boolean;
+}
+
+interface ParticleProps {
+  edgePath: string;
+  color: string;
+  initialOffset: number;
+  finalOffset: number;
+  duration: number;
+  delay: number;
+  index: number;
+}
+
+function Particle({
+  edgePath,
+  color,
+  initialOffset,
+  finalOffset,
+  duration,
+  delay,
+}: ParticleProps) {
+  const offsetValue = useMotionValue(initialOffset);
+  const [offsetDistance, setOffsetDistance] = useState(`${initialOffset}%`);
+
+  useEffect(() => {
+    const controls = animate(offsetValue, finalOffset, {
+      duration,
+      repeat: Infinity,
+      ease: "linear",
+      delay,
+    });
+
+    // Update offsetDistance on each frame
+    const updateOffset = () => {
+      const currentValue = offsetValue.get();
+      setOffsetDistance(`${currentValue}%`);
+      requestAnimationFrame(updateOffset);
+    };
+    const rafId = requestAnimationFrame(updateOffset);
+
+    return () => {
+      controls.stop();
+      cancelAnimationFrame(rafId);
+    };
+  }, [offsetValue, finalOffset, duration, delay]);
+
+  return (
+    <circle
+      r={3}
+      fill={color}
+      opacity={0.8}
+      style={
+        {
+          offsetPath: `path('${edgePath}')`,
+          offsetRotate: "0deg",
+          offsetDistance,
+        } as React.CSSProperties & { offsetDistance: string }
+      }
+    />
+  );
 }
 
 /**
@@ -55,27 +114,24 @@ export function FlowingParticles({
 
   return (
     <>
-      {Array.from({ length: particleCount }).map((_, i) => (
-        <motion.circle
-          key={i}
-          r={3}
-          fill={color}
-          opacity={0.8}
-          initial={{ offsetDistance: `${(i * 100) / particleCount}%` }}
-          animate={{ offsetDistance: `${((i + 1) * 100) / particleCount}%` }}
-          transition={{
-            duration,
-            repeat: Infinity,
-            ease: "linear",
-            delay: (i * duration) / particleCount,
-          }}
-          style={{
-            offsetPath: `path('${edgePath}')`,
-            offsetRotate: "0deg",
-          }}
-        />
-      ))}
+      {Array.from({ length: particleCount }).map((_, i) => {
+        const initialOffset = (i * 100) / particleCount;
+        const finalOffset = ((i + 1) * 100) / particleCount;
+        const delay = (i * duration) / particleCount;
+
+        return (
+          <Particle
+            key={i}
+            edgePath={edgePath}
+            color={color}
+            initialOffset={initialOffset}
+            finalOffset={finalOffset}
+            duration={duration}
+            delay={delay}
+            index={i}
+          />
+        );
+      })}
     </>
   );
 }
-

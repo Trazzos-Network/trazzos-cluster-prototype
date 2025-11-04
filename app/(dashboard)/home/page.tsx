@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -9,8 +10,10 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { COMPREHENSIVE_SAMPLE_2026_H1 } from "@/data/sample_data_extended";
 import { SAMPLE_OUTPUT } from "@/data/sample_data";
 import { EstadoSinergia, Criticidad } from "@/types/models";
+import { useSynergiesStore } from "@/stores/synergies-store";
 import {
   TrendingUp,
   DollarSign,
@@ -20,20 +23,32 @@ import {
   CheckCircle,
   Clock,
 } from "lucide-react";
+import Link from "next/link";
 
 export default function HomePage() {
-  const kpis = SAMPLE_OUTPUT.kpis;
-  const sinergias = SAMPLE_OUTPUT.sinergias;
-  const leaderboard = SAMPLE_OUTPUT.leaderboard;
-  const paradasCount = SAMPLE_OUTPUT.paradas.length;
+  // Get synergies from store
+  const sinergias = useSynergiesStore((state) => state.sinergias);
+
+  // KPIs is an array in extended data, get the latest one, or use single object from basic data
+  const kpis = Array.isArray(COMPREHENSIVE_SAMPLE_2026_H1.kpis)
+    ? COMPREHENSIVE_SAMPLE_2026_H1.kpis[
+        COMPREHENSIVE_SAMPLE_2026_H1.kpis.length - 1
+      ]
+    : COMPREHENSIVE_SAMPLE_2026_H1.kpis || SAMPLE_OUTPUT.kpis;
+  const leaderboard =
+    COMPREHENSIVE_SAMPLE_2026_H1.leaderboard || SAMPLE_OUTPUT.leaderboard;
+  const paradas = COMPREHENSIVE_SAMPLE_2026_H1.paradas || SAMPLE_OUTPUT.paradas;
+  const paradasCount = paradas.length;
   const empresasParticipantes = kpis.empresas_participantes;
 
-  // Calculate active synergies
-  const sinergiasCerradas = sinergias.filter(
-    (s) => s.estado === EstadoSinergia.CERRADA
+  // Calculate active synergies from store using useMemo to avoid infinite loops
+  const sinergiasCerradas = useMemo(
+    () => sinergias.filter((s) => s.estado === EstadoSinergia.CERRADA),
+    [sinergias]
   );
-  const sinergiasActivas = sinergias.filter(
-    (s) => s.estado === EstadoSinergia.EN_RFP
+  const sinergiasActivas = useMemo(
+    () => sinergias.filter((s) => s.estado === EstadoSinergia.EN_RFP),
+    [sinergias]
   );
 
   return (
@@ -139,43 +154,46 @@ export default function HomePage() {
               <CardContent>
                 <div className="space-y-4">
                   {sinergiasActivas.map((sinergia) => (
-                    <div
+                    <Link
                       key={sinergia.id}
-                      className="rounded-lg border p-4 space-y-2"
+                      href={`/synergies/${encodeURIComponent(sinergia.id)}`}
+                      className="block"
                     >
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold">{sinergia.insumo}</h3>
-                        <Badge variant="secondary">
-                          {sinergia.estado.replace("_", " ")}
-                        </Badge>
+                      <div className="rounded-lg border p-4 space-y-2 hover:bg-accent transition-colors cursor-pointer">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-semibold">{sinergia.insumo}</h3>
+                          <Badge variant="secondary">
+                            {sinergia.estado.replace("_", " ")}
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div>
+                            <span className="text-muted-foreground">
+                              Empresas:
+                            </span>{" "}
+                            {sinergia.empresas_involucradas}
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">
+                              Volumen:
+                            </span>{" "}
+                            {sinergia.volumen_total} {sinergia.unidad_medida}
+                          </div>
+                          <div className="col-span-2">
+                            <span className="text-muted-foreground">
+                              Ahorro estimado:
+                            </span>{" "}
+                            <span className="font-bold text-green-600">
+                              $
+                              {(
+                                (sinergia.ahorro_estimado_monto || 0) / 1000
+                              ).toFixed(0)}
+                              K ({sinergia.ahorro_estimado_pct}%)
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div>
-                          <span className="text-muted-foreground">
-                            Empresas:
-                          </span>{" "}
-                          {sinergia.empresas_involucradas}
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">
-                            Volumen:
-                          </span>{" "}
-                          {sinergia.volumen_total} {sinergia.unidad_medida}
-                        </div>
-                        <div className="col-span-2">
-                          <span className="text-muted-foreground">
-                            Ahorro estimado:
-                          </span>{" "}
-                          <span className="font-bold text-green-600">
-                            $
-                            {(
-                              (sinergia.ahorro_estimado_monto || 0) / 1000
-                            ).toFixed(0)}
-                            K ({sinergia.ahorro_estimado_pct}%)
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               </CardContent>
@@ -193,45 +211,49 @@ export default function HomePage() {
               <CardContent>
                 <div className="space-y-4">
                   {sinergiasCerradas.map((sinergia) => (
-                    <div
+                    <Link
                       key={sinergia.id}
-                      className="rounded-lg border p-4 space-y-2"
+                      href={`/synergies/${encodeURIComponent(sinergia.id)}`}
+                      className="block"
                     >
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold">{sinergia.insumo}</h3>
-                        <Badge>Cerrada</Badge>
+                      <div className="rounded-lg border p-4 space-y-2 hover:bg-accent transition-colors cursor-pointer">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-semibold">{sinergia.insumo}</h3>
+                          <Badge>Cerrada</Badge>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div className="col-span-2">
+                            <span className="text-muted-foreground">
+                              Proveedor:
+                            </span>{" "}
+                            {sinergia.decision?.proveedor_seleccionado}
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">
+                              Empresas:
+                            </span>{" "}
+                            {sinergia.empresas_involucradas}
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">PO:</span>{" "}
+                            {sinergia.decision?.po_numero}
+                          </div>
+                          <div className="col-span-2">
+                            <span className="text-muted-foreground">
+                              Ahorro real:
+                            </span>{" "}
+                            <span className="font-bold text-green-600">
+                              $
+                              {(
+                                (sinergia.decision?.ahorro_real_monto || 0) /
+                                1000
+                              ).toFixed(0)}
+                              K ({sinergia.decision?.ahorro_real_pct}%)
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div className="col-span-2">
-                          <span className="text-muted-foreground">
-                            Proveedor:
-                          </span>{" "}
-                          {sinergia.decision?.proveedor_seleccionado}
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">
-                            Empresas:
-                          </span>{" "}
-                          {sinergia.empresas_involucradas}
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">PO:</span>{" "}
-                          {sinergia.decision?.po_numero}
-                        </div>
-                        <div className="col-span-2">
-                          <span className="text-muted-foreground">
-                            Ahorro real:
-                          </span>{" "}
-                          <span className="font-bold text-green-600">
-                            $
-                            {(
-                              (sinergia.decision?.ahorro_real_monto || 0) / 1000
-                            ).toFixed(0)}
-                            K ({sinergia.decision?.ahorro_real_pct}%)
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               </CardContent>
@@ -291,7 +313,7 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {SAMPLE_OUTPUT.paradas.map((parada) => (
+                {paradas.map((parada) => (
                   <div
                     key={parada.parada_id}
                     className="rounded-lg border p-4 space-y-2"

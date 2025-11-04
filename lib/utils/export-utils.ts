@@ -20,7 +20,9 @@ export async function exportSVGAsPNG(
   const clonedSVG = svgElement.cloneNode(true) as SVGElement;
 
   // Get bounding box if dimensions not provided
-  const bbox = svgElement.getBBox();
+  // getBBox() is available on SVGSVGElement and SVGGElement
+  const svgSVG = svgElement as SVGSVGElement | SVGGElement;
+  const bbox = svgSVG.getBBox?.() || { width: 0, height: 0, x: 0, y: 0 };
   const svgWidth = width || bbox.width;
   const svgHeight = height || bbox.height;
 

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Home, Settings, ChevronUp, User2, Network } from "lucide-react";
+import { Home, Settings, ChevronUp, User2, Network, ShoppingBag, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -35,6 +35,16 @@ const items = [
     title: "Synergies",
     url: "/synergies",
     icon: Network,
+  },
+  {
+    title: "Proveedores",
+    url: "/proveedores",
+    icon: ShoppingBag,
+  },
+  {
+    title: "Comite",
+    url: "/comite",
+    icon: Users,
   },
   {
     title: "Settings",

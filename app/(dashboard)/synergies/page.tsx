@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { COMPREHENSIVE_SAMPLE_2026_H1 as SAMPLE_OUTPUT } from "@/data/sample_data_extended";
 import { SynergiesGraphEnhanced } from "./components/SynergiesGraphEnhanced";
 import { TimelineView } from "./components/TimelineView";
 import { TopBar } from "./components/TopBar";
@@ -9,9 +8,10 @@ import { ComparisonPanel } from "./components/ComparisonPanel";
 import { FilterState, ViewState } from "@/types/synergies-viz";
 import { SinergiaDetectada } from "@/types/models";
 import { exportSVGAsPNG } from "@/lib/utils/export-utils";
+import { useSynergiesStore } from "@/stores/synergies-store";
 
 export default function SynergiesPage() {
-  const allSinergias = SAMPLE_OUTPUT.sinergias;
+  const allSinergias = useSynergiesStore((state) => state.sinergias);
   const [view, setView] = useState<ViewState["mode"]>("graph");
   const [filters, setFilters] = useState<FilterState>({
     estados: [],

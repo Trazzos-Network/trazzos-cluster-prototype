@@ -1,8 +1,13 @@
 "use client";
 
 import { useMemo, useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { SinergiaDetectada } from "@/types/models";
-import { TimelineBlock, TimelineEvent } from "@/types/synergies-viz";
+import {
+  TimelineBlock,
+  TimelineEvent,
+  TimelineEventType,
+} from "@/types/synergies-viz";
 import {
   transformToTimelineBlocks,
   groupBlocksByCompany,
@@ -62,6 +67,7 @@ const EVENT_TYPE_LABELS: Record<string, string> = {
  * Main Timeline View component showing synergies in a Gantt-style timeline
  */
 export function TimelineView({ sinergias, onBlockClick }: TimelineViewProps) {
+  const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -89,7 +95,7 @@ export function TimelineView({ sinergias, onBlockClick }: TimelineViewProps) {
   // Get unique event types for filtering
   const availableEventTypes = useMemo(() => {
     const types = new Set(timelineEvents.map((e) => e.type));
-    return Array.from(types);
+    return Array.from(types) as TimelineEventType[];
   }, [timelineEvents]);
 
   // Calculate timeline date range from actual data (exactly 12 months)
@@ -174,6 +180,14 @@ export function TimelineView({ sinergias, onBlockClick }: TimelineViewProps) {
     setSelectedEventTypes([]);
   };
 
+  // Handle block click - navigate to detail page
+  const handleBlockClick = (block: TimelineBlock) => {
+    router.push(`/synergies/${encodeURIComponent(block.sinergiaId)}`);
+    if (onBlockClick) {
+      onBlockClick(block);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -237,7 +251,7 @@ export function TimelineView({ sinergias, onBlockClick }: TimelineViewProps) {
                         />
                         <div className="flex items-center gap-2 flex-1">
                           <span className="text-sm">
-                            {getEventTypeIcon(eventType as any)}
+                            {getEventTypeIcon(eventType)}
                           </span>
                           <span className="text-sm">
                             {EVENT_TYPE_LABELS[eventType] || eventType}
@@ -295,13 +309,10 @@ export function TimelineView({ sinergias, onBlockClick }: TimelineViewProps) {
               timelineEnd={timelineEnd}
               onEventHover={setHoveredEvent}
               onEventClick={(event) => {
-                // Find and highlight related synergy block
-                const relatedBlock = blocks.find(
-                  (b) => b.sinergiaId === event.sinergiaId
+                // Navigate to synergy detail page
+                router.push(
+                  `/synergies/${encodeURIComponent(event.sinergiaId)}`
                 );
-                if (relatedBlock && onBlockClick) {
-                  onBlockClick(relatedBlock);
-                }
                 // Also focus on the event date
                 setFocusedDate(event.date);
               }}
@@ -336,7 +347,7 @@ export function TimelineView({ sinergias, onBlockClick }: TimelineViewProps) {
                   timelineEnd={timelineEnd}
                   timelineWidth={timelineWidth}
                   scrollLeft={0}
-                  onBlockClick={onBlockClick}
+                  onBlockClick={handleBlockClick}
                   onBlockHover={setHoveredBlock}
                 />
               );
