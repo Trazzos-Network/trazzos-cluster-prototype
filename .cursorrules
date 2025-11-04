@@ -1,0 +1,371 @@
+# Cursor Rules for Trazzos Cluster Prototype
+
+## Project Overview
+
+Trazzos Cluster Prototype - A modern Next.js application with shadcn/ui, dark mode support, and world-class architecture.
+
+## Core Principles
+
+### Code Quality & Architecture
+
+- Follow functional and declarative programming patterns
+- Avoid classes; prefer functions and React hooks
+- Write TypeScript with strict type safety
+- Use descriptive variable names with auxiliary verbs (isLoading, hasError, canSubmit)
+- Implement proper error handling with custom error types
+- Use early returns and guard clauses for cleaner code flow
+
+### Next.js Best Practices
+
+- Minimize use of 'use client' - prefer React Server Components (RSC)
+- Avoid unnecessary useEffect and setState
+- Implement dynamic imports for code splitting
+- Optimize images: WebP format, size data, lazy loading
+- Use Next.js SSR features where appropriate
+
+### Package Management
+
+- **Default package manager: pnpm**
+- Always use `pnpm install`, `pnpm add`, `pnpm remove`
+- Never use npm or yarn unless explicitly required
+
+### Project Structure
+
+```
+trazzos-cluster-prototype/
+├── app/                        # Next.js app directory
+│   ├── (auth)/                # Auth routes group
+│   ├── (dashboard)/           # Dashboard routes group
+│   ├── api/                   # API routes
+│   ├── layout.tsx             # Root layout
+│   ├── page.tsx               # Home page
+│   └── globals.css            # Global styles
+├── components/                 # React components
+│   ├── ui/                    # shadcn/ui components
+│   ├── features/              # Feature-specific components
+│   ├── layouts/               # Layout components
+│   └── shared/                # Shared/common components
+├── lib/                       # Utility functions
+│   ├── utils.ts               # General utilities
+│   ├── api/                   # API clients and helpers
+│   ├── hooks/                 # Custom React hooks
+│   ├── validations/           # Zod schemas
+│   └── constants/             # Constants and enums
+├── types/                     # TypeScript type definitions
+│   ├── api.ts                 # API types
+│   ├── models.ts              # Data models
+│   └── index.ts               # Barrel exports
+├── stores/                    # State management (Zustand)
+│   ├── auth-store.ts
+│   └── ui-store.ts
+├── docs/                      # **All documentation goes here**
+│   ├── architecture/          # Architecture decisions
+│   ├── features/              # Feature documentation
+│   ├── api/                   # API documentation
+│   └── guides/                # Development guides
+├── public/                    # Static assets
+├── tests/                     # Test files
+│   ├── unit/                  # Unit tests
+│   ├── integration/           # Integration tests
+│   └── e2e/                   # End-to-end tests
+└── config/                    # Configuration files
+    ├── site.ts                # Site configuration
+    └── env.ts                 # Environment variables
+```
+
+### Naming Conventions
+
+- **Directories**: lowercase-with-dashes (e.g., `auth-wizard`, `user-profile`)
+- **Components**: PascalCase (e.g., `UserProfile.tsx`, `AuthForm.tsx`)
+- **Utilities**: camelCase (e.g., `formatDate.ts`, `validateEmail.ts`)
+- **Types**: PascalCase with descriptive suffixes (e.g., `UserType`, `ApiResponse`)
+- **Hooks**: camelCase with 'use' prefix (e.g., `useAuth`, `useTheme`)
+
+### Component Structure
+
+```typescript
+// 1. Imports (external, then internal)
+import * as React from "react";
+import { useRouter } from "next/navigation";
+
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+// 2. Types/Interfaces
+interface ComponentProps {
+  title: string;
+  description?: string;
+}
+
+// 3. Component
+export function Component({ title, description }: ComponentProps) {
+  // Hooks first
+  const router = useRouter();
+
+  // State
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  // Handlers
+  const handleClick = () => {
+    // Implementation
+  };
+
+  // Render
+  return <div>{/* JSX */}</div>;
+}
+```
+
+### Documentation Requirements
+
+#### When to Document
+
+Document **immediately** when:
+
+- Creating a new feature or component
+- Adding API endpoints
+- Implementing complex business logic
+- Making architectural decisions
+- Adding new dependencies
+- Creating reusable utilities
+- Implementing authentication/authorization
+- Setting up integrations
+
+#### Documentation Structure
+
+All documentation must go in `/docs`:
+
+```
+docs/
+├── architecture/
+│   ├── overview.md           # System architecture
+│   ├── decisions/            # ADRs (Architecture Decision Records)
+│   │   └── 001-state-management.md
+│   └── diagrams/             # Architecture diagrams
+├── features/
+│   ├── authentication.md     # Feature docs
+│   ├── user-management.md
+│   └── api-integration.md
+├── api/
+│   ├── endpoints.md          # API documentation
+│   └── schemas.md            # Data schemas
+└── guides/
+    ├── getting-started.md    # Setup guide
+    ├── contributing.md       # Contribution guide
+    └── deployment.md         # Deployment guide
+```
+
+#### Documentation Template
+
+```markdown
+# Feature/Component Name
+
+## Overview
+
+Brief description of the feature/component.
+
+## Purpose
+
+Why this exists and what problem it solves.
+
+## Usage
+
+\`\`\`typescript
+// Code examples
+\`\`\`
+
+## API Reference
+
+- Props/Parameters
+- Return values
+- Types
+
+## Dependencies
+
+- List of dependencies
+- Why they were chosen
+
+## Implementation Details
+
+- Key technical decisions
+- Edge cases handled
+- Performance considerations
+
+## Testing
+
+- Test coverage
+- How to test
+
+## Future Improvements
+
+- Known limitations
+- Planned enhancements
+```
+
+### UI & Styling
+
+- Use Tailwind CSS utility classes
+- Follow shadcn/ui component patterns
+- Use CSS variables for theming
+- Mobile-first responsive design
+- Support both light and dark modes
+- Maintain consistent spacing (4px grid system)
+
+### State Management
+
+- Use Zustand for global state
+- Use React Query (TanStack Query) for server state
+- Prefer server components when possible
+- Keep state as local as possible
+
+### Validation
+
+- Use Zod for schema validation
+- Validate at API boundaries
+- Provide clear error messages
+- Use type-safe form handling
+
+### Error Handling
+
+```typescript
+// Custom error types
+class ApiError extends Error {
+  constructor(message: string, public statusCode: number, public code: string) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
+// Error handling pattern
+try {
+  const result = await fetchData();
+  if (!result.success) {
+    throw new ApiError(result.message, result.statusCode, result.code);
+  }
+  return result.data;
+} catch (error) {
+  if (error instanceof ApiError) {
+    // Handle API errors
+  }
+  // Handle other errors
+}
+```
+
+### Testing
+
+- Write unit tests with Jest and React Testing Library
+- Use meaningful test descriptions
+- Test user interactions, not implementation
+- Aim for high test coverage on critical paths
+- Use MSW for API mocking
+
+### Security
+
+- Validate all user inputs
+- Sanitize data before rendering
+- Use environment variables for secrets
+- Implement proper authentication/authorization
+- Follow OWASP security guidelines
+
+### Performance
+
+- Use React.memo for expensive components
+- Implement virtualization for long lists
+- Optimize images and assets
+- Use proper caching strategies
+- Monitor Core Web Vitals
+
+### Git Workflow
+
+- Use conventional commits
+- Create feature branches
+- Write descriptive commit messages
+- Keep commits atomic and focused
+
+### Comments & JSDoc
+
+```typescript
+/**
+ * Fetches user data from the API
+ * @param userId - The unique identifier for the user
+ * @returns Promise resolving to user data
+ * @throws {ApiError} When the API request fails
+ */
+async function fetchUser(userId: string): Promise<User> {
+  // Implementation
+}
+```
+
+### Import Aliases
+
+Use these path aliases:
+
+- `@/components` - Components directory
+- `@/lib` - Utility functions
+- `@/types` - Type definitions
+- `@/stores` - State management
+- `@/app` - App directory
+
+### Code Review Checklist
+
+Before considering code complete:
+
+- [ ] TypeScript types are complete and accurate
+- [ ] Error handling is implemented
+- [ ] Edge cases are handled
+- [ ] Code follows project conventions
+- [ ] Tests are written and passing
+- [ ] Documentation is updated in `/docs`
+- [ ] No console.logs or debugging code
+- [ ] Accessibility is considered
+- [ ] Performance is optimized
+- [ ] Security is reviewed
+
+## AI Agent Instructions
+
+When working on this project:
+
+1. Always use pnpm for package management
+2. Update documentation in `/docs` immediately after implementing features
+3. Follow the folder structure strictly
+4. Write comprehensive TypeScript types
+5. Implement proper error handling
+6. Create tests for new features
+7. Ensure dark mode compatibility
+8. Optimize for performance
+9. Follow security best practices
+10. Ask for clarification if requirements are unclear
+
+## Common Commands
+
+```bash
+# Development
+pnpm dev
+
+# Build
+pnpm build
+
+# Lint
+pnpm lint
+
+# Type check
+pnpm type-check
+
+# Test
+pnpm test
+
+# Add dependency
+pnpm add <package>
+
+# Add dev dependency
+pnpm add -D <package>
+
+# Add shadcn component
+pnpm dlx shadcn@latest add <component>
+```
+
+## Resources
+
+- Next.js: https://nextjs.org/docs
+- shadcn/ui: https://ui.shadcn.com
+- Tailwind CSS: https://tailwindcss.com
+- TypeScript: https://www.typescriptlang.org
