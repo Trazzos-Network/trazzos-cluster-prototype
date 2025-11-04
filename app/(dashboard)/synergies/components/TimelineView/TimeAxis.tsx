@@ -16,7 +16,6 @@ interface TimeAxisProps {
   timelineStart: Date;
   timelineEnd: Date;
   width: number;
-  scrollLeft: number;
   onDateClick?: (date: Date) => void;
   selectedDate?: Date | null;
   currentDate?: Date;
@@ -31,7 +30,6 @@ export function TimeAxis({
   timelineStart,
   timelineEnd,
   width,
-  scrollLeft,
   onDateClick,
   selectedDate,
   currentDate = new Date(),
@@ -39,16 +37,14 @@ export function TimeAxis({
   const [hoveredDate, setHoveredDate] = useState<Date | null>(null);
 
   // Calculate positions for months and add week subdivisions
+  // Use the same calculation method as other components for consistency
   const { monthPositions, weekPositions, todayPosition } = useMemo(() => {
-    const totalDays =
-      (timelineEnd.getTime() - timelineStart.getTime()) / (1000 * 60 * 60 * 24);
+    const totalMs = timelineEnd.getTime() - timelineStart.getTime();
 
     const monthPos = months.map((month) => {
       const monthStart = startOfMonth(month);
-      const daysFromStart =
-        (monthStart.getTime() - timelineStart.getTime()) /
-        (1000 * 60 * 60 * 24);
-      const position = (daysFromStart / totalDays) * width;
+      const msFromStart = monthStart.getTime() - timelineStart.getTime();
+      const position = (msFromStart / totalMs) * width;
       return { month, position };
     });
 
@@ -56,19 +52,17 @@ export function TimeAxis({
     const weekPos: Array<{ date: Date; position: number }> = [];
     let weekDate = new Date(timelineStart);
     while (weekDate <= timelineEnd) {
-      const daysFromStart =
-        (weekDate.getTime() - timelineStart.getTime()) / (1000 * 60 * 60 * 24);
-      const position = (daysFromStart / totalDays) * width;
+      const msFromStart = weekDate.getTime() - timelineStart.getTime();
+      const position = (msFromStart / totalMs) * width;
       weekPos.push({ date: new Date(weekDate), position });
       weekDate = new Date(weekDate.getTime() + 7 * 24 * 60 * 60 * 1000);
     }
 
     // Calculate today's position
-    const todayDaysFromStart =
-      (currentDate.getTime() - timelineStart.getTime()) / (1000 * 60 * 60 * 24);
+    const todayMsFromStart = currentDate.getTime() - timelineStart.getTime();
     const todayPos =
-      todayDaysFromStart >= 0 && todayDaysFromStart <= totalDays
-        ? (todayDaysFromStart / totalDays) * width
+      todayMsFromStart >= 0 && todayMsFromStart <= totalMs
+        ? (todayMsFromStart / totalMs) * width
         : null;
 
     return {
@@ -78,30 +72,24 @@ export function TimeAxis({
     };
   }, [months, timelineStart, timelineEnd, width, currentDate]);
 
-  // Calculate selected date position
+  // Calculate selected date position using millisecond precision
   const selectedDatePosition = useMemo(() => {
     if (!selectedDate) return null;
-    const totalDays =
-      (timelineEnd.getTime() - timelineStart.getTime()) / (1000 * 60 * 60 * 24);
-    const daysFromStart =
-      (selectedDate.getTime() - timelineStart.getTime()) /
-      (1000 * 60 * 60 * 24);
-    if (daysFromStart < 0 || daysFromStart > totalDays) return null;
-    return (daysFromStart / totalDays) * width;
+    const totalMs = timelineEnd.getTime() - timelineStart.getTime();
+    const msFromStart = selectedDate.getTime() - timelineStart.getTime();
+    if (msFromStart < 0 || msFromStart > totalMs) return null;
+    return (msFromStart / totalMs) * width;
   }, [selectedDate, timelineStart, timelineEnd, width]);
 
   const handleAxisClick = (e: React.MouseEvent<SVGSVGElement>) => {
     if (!onDateClick) return;
 
     const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left + scrollLeft;
-    const totalDays =
-      (timelineEnd.getTime() - timelineStart.getTime()) / (1000 * 60 * 60 * 24);
+    const x = e.clientX - rect.left;
+    const totalMs = timelineEnd.getTime() - timelineStart.getTime();
     const normalizedX = Math.max(0, Math.min(1, x / width));
-    const daysFromStart = normalizedX * totalDays;
-    const clickedDate = new Date(
-      timelineStart.getTime() + daysFromStart * 24 * 60 * 60 * 1000
-    );
+    const msFromStart = normalizedX * totalMs;
+    const clickedDate = new Date(timelineStart.getTime() + msFromStart);
 
     onDateClick(clickedDate);
   };
@@ -129,19 +117,16 @@ export function TimeAxis({
             width={width}
             height={80}
             className="block cursor-pointer"
+            style={{ overflow: "visible" }}
             onClick={handleAxisClick}
             onMouseMove={(e) => {
               if (!onDateClick) return;
               const rect = e.currentTarget.getBoundingClientRect();
-              const x = e.clientX - rect.left + scrollLeft;
-              const totalDays =
-                (timelineEnd.getTime() - timelineStart.getTime()) /
-                (1000 * 60 * 60 * 24);
+              const x = e.clientX - rect.left;
+              const totalMs = timelineEnd.getTime() - timelineStart.getTime();
               const normalizedX = Math.max(0, Math.min(1, x / width));
-              const daysFromStart = normalizedX * totalDays;
-              const hoverDate = new Date(
-                timelineStart.getTime() + daysFromStart * 24 * 60 * 60 * 1000
-              );
+              const msFromStart = normalizedX * totalMs;
+              const hoverDate = new Date(timelineStart.getTime() + msFromStart);
               setHoveredDate(hoverDate);
             }}
             onMouseLeave={() => setHoveredDate(null)}

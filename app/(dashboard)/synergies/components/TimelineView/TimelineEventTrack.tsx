@@ -43,10 +43,12 @@ export function TimelineEventTrack({
     return events.filter((e) => selectedEventTypes.includes(e.type));
   }, [events, selectedEventTypes]);
 
-  // Group events by date to handle overlapping markers
+  // Group events by date (rounded to day) to handle overlapping markers
+  // But use actual event dates for positioning
   const eventsByDate = useMemo(() => {
     const grouped = new Map<string, TimelineEvent[]>();
     for (const event of filteredEvents) {
+      // Use date rounded to day for grouping, but keep original date for positioning
       const dateKey = event.date.toISOString().split("T")[0];
       if (!grouped.has(dateKey)) {
         grouped.set(dateKey, []);
@@ -56,7 +58,7 @@ export function TimelineEventTrack({
     return grouped;
   }, [filteredEvents]);
 
-  // Calculate positions for all events
+  // Calculate positions for all events using actual event dates
   const eventPositions = useMemo(() => {
     const positions: Array<{
       event: TimelineEvent;
@@ -65,19 +67,19 @@ export function TimelineEventTrack({
     }> = [];
 
     for (const [dateKey, dateEvents] of eventsByDate.entries()) {
-      const date = new Date(dateKey);
-      const basePosition = calculateDatePosition(
-        date,
-        timelineStart,
-        timelineEnd,
-        timelineWidth
-      );
-
       // Stack overlapping events vertically
       dateEvents.forEach((event, index) => {
+        // Use the actual event date for positioning, not the rounded date key
+        const position = calculateDatePosition(
+          event.date,
+          timelineStart,
+          timelineEnd,
+          timelineWidth
+        );
+
         positions.push({
           event,
-          position: basePosition,
+          position,
           stackIndex: index,
         });
       });
@@ -98,7 +100,7 @@ export function TimelineEventTrack({
 
       {/* Event track - aligned with TimeAxis */}
       <div
-        className="absolute left-0 right-0 top-0 bottom-0 bg-background/95 backdrop-blur-sm"
+        className="absolute border-l-2 border-amber-500 left-[200px] right-0 top-0 bottom-0"
         style={{ paddingLeft: 200 }}
       >
         {/* Render milestones */}
@@ -116,9 +118,10 @@ export function TimelineEventTrack({
         {Array.from(eventsByDate.entries())
           .filter(([_, events]) => events.length > 1)
           .map(([dateKey, dateEvents]) => {
-            const date = new Date(dateKey);
+            // Use the first event's date for positioning the badge
+            const firstEventDate = dateEvents[0]!.date;
             const position = calculateDatePosition(
-              date,
+              firstEventDate,
               timelineStart,
               timelineEnd,
               timelineWidth

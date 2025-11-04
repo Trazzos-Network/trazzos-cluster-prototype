@@ -1,12 +1,26 @@
 "use client";
 
-import { TimelineBlock, ESTADO_COLORS } from "@/types/synergies-viz";
+import { TimelineBlock } from "@/types/synergies-viz";
 import { SynergyBlock } from "./SynergyBlock";
-import { format } from "date-fns";
+import { MaintenancePeriodBlock } from "./MaintenancePeriodBlock";
+import {
+  calculateDatePosition,
+  calculateBlockWidth,
+} from "@/lib/synergies/timeline-utils";
+
+interface MaintenancePeriod {
+  id: string;
+  start: Date;
+  end: Date;
+  planta?: string;
+  unidad?: string;
+  criticidad?: string;
+}
 
 interface SwimLaneProps {
   empresa: string;
   blocks: TimelineBlock[];
+  maintenancePeriods?: MaintenancePeriod[];
   color: string;
   laneHeight: number;
   timelineStart: Date;
@@ -23,6 +37,7 @@ interface SwimLaneProps {
 export function SwimLane({
   empresa,
   blocks,
+  maintenancePeriods = [],
   color,
   laneHeight,
   timelineStart,
@@ -32,18 +47,24 @@ export function SwimLane({
   onBlockClick,
   onBlockHover,
 }: SwimLaneProps) {
-  const calculatePosition = (date: Date): number => {
-    const totalDays =
-      (timelineEnd.getTime() - timelineStart.getTime()) / (1000 * 60 * 60 * 24);
-    const daysFromStart =
-      (date.getTime() - timelineStart.getTime()) / (1000 * 60 * 60 * 24);
-    return (daysFromStart / totalDays) * timelineWidth;
+  // Use shared utility for consistent positioning
+  const getPosition = (date: Date): number => {
+    return calculateDatePosition(
+      date,
+      timelineStart,
+      timelineEnd,
+      timelineWidth
+    );
   };
 
-  const calculateWidth = (start: Date, end: Date): number => {
-    const startPos = calculatePosition(start);
-    const endPos = calculatePosition(end);
-    return Math.max(endPos - startPos, 10); // Minimum 10px
+  const getWidth = (start: Date, end: Date): number => {
+    return calculateBlockWidth(
+      start,
+      end,
+      timelineStart,
+      timelineEnd,
+      timelineWidth
+    );
   };
 
   return (
@@ -53,7 +74,7 @@ export function SwimLane({
     >
       {/* Company label */}
       <div
-        className="sticky left-0 z-20 flex items-center h-full px-4 bg-background border-r border-border min-w-[200px]"
+        className="sticky left-0 z-999 flex items-center h-full px-4 bg-transparent border-r border-border min-w-[200px]"
         style={{
           transform: `translateX(${scrollLeft > 0 ? scrollLeft : 0}px)`,
         }}
@@ -69,15 +90,37 @@ export function SwimLane({
 
       {/* Timeline blocks */}
       <div
-        className="absolute top-0 left-[200px] h-full"
+        className="absolute border-l-2 border-cyan-500 top-0 left-[200px] h-full z-10 pointer-events-auto"
         style={{
           width: timelineWidth,
-          transform: `translateX(-${scrollLeft}px)`,
         }}
       >
+        {/* Maintenance Period Blocks - shown behind synergy blocks */}
+        {maintenancePeriods.map((period) => {
+          const position = getPosition(period.start);
+          const width = getWidth(period.start, period.end);
+
+          return (
+            <MaintenancePeriodBlock
+              key={period.id}
+              id={period.id}
+              empresa={empresa}
+              start={period.start}
+              end={period.end}
+              position={position}
+              width={width}
+              laneHeight={laneHeight}
+              planta={period.planta}
+              unidad={period.unidad}
+              criticidad={period.criticidad}
+            />
+          );
+        })}
+
+        {/* Synergy Blocks - shown on top of maintenance periods */}
         {blocks.map((block) => {
-          const position = calculatePosition(block.start);
-          const width = calculateWidth(block.start, block.end);
+          const position = getPosition(block.start);
+          const width = getWidth(block.start, block.end);
 
           return (
             <SynergyBlock

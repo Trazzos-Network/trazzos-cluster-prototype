@@ -93,27 +93,29 @@ export default function SynergiesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <TopBar
-        view={view}
-        onViewChange={setView}
-        filters={filters}
-        onFiltersChange={setFilters}
-        sinergias={allSinergias}
-        onExportPNG={view === "graph" ? handleExportPNG : undefined}
-        showMiniMap={showMiniMap}
-        onToggleMiniMap={
-          view === "graph" ? () => setShowMiniMap(!showMiniMap) : undefined
-        }
-      />
-      <div className="container mx-auto px-4 py-6">
-        <div className="mb-6">
-          <h1 className="text-4xl font-bold tracking-tight">
-            Visualización de Sinergias
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Red de colaboración entre empresas del clúster petroquímico
-          </p>
+    <div className="min-h-screen w-full bg-background">
+      <div className="w-full mx-auto px-4 py-6">
+        <div className="flex justify-between items-center">
+          <div className="mb-6">
+            <h1 className="text-4xl font-bold tracking-tight">
+              Visualización de Sinergias
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Red de colaboración entre empresas del clúster petroquímico
+            </p>
+          </div>
+          <TopBar
+            view={view}
+            onViewChange={setView}
+            filters={filters}
+            onFiltersChange={setFilters}
+            sinergias={allSinergias}
+            onExportPNG={view === "graph" ? handleExportPNG : undefined}
+            showMiniMap={showMiniMap}
+            onToggleMiniMap={
+              view === "graph" ? () => setShowMiniMap(!showMiniMap) : undefined
+            }
+          />
         </div>
         <div ref={graphRef}>
           {view === "graph" ? (

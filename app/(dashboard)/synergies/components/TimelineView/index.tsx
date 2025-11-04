@@ -6,9 +6,9 @@ import { TimelineBlock, TimelineEvent } from "@/types/synergies-viz";
 import {
   transformToTimelineBlocks,
   groupBlocksByCompany,
-  getTimelineDateRange,
-  calculateOverlaps,
+  getTimelineDateRangeFromData,
   calculateDatePosition,
+  extractMaintenancePeriods,
 } from "@/lib/synergies/timeline-utils";
 import {
   extractAllTimelineEvents,
@@ -16,7 +16,7 @@ import {
 } from "@/lib/synergies/timeline-events";
 import { TimeAxis } from "./TimeAxis";
 import { SwimLane } from "./SwimLane";
-import { OverlapIndicator } from "./OverlapIndicator";
+// Removed OverlapIndicator - replaced with maintenance period blocks
 // Removed TimeScrubber - date selection now integrated into TimeAxis
 import { TimelineEventTrack } from "./TimelineEventTrack";
 import {
@@ -63,7 +63,6 @@ const EVENT_TYPE_LABELS: Record<string, string> = {
  */
 export function TimelineView({ sinergias, onBlockClick }: TimelineViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [scrollLeft, setScrollLeft] = useState(0);
   const [scrollTop, setScrollTop] = useState(0);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [focusedDate, setFocusedDate] = useState<Date | null>(null);
@@ -93,24 +92,30 @@ export function TimelineView({ sinergias, onBlockClick }: TimelineViewProps) {
     return Array.from(types);
   }, [timelineEvents]);
 
+  // Calculate timeline date range from actual data (exactly 12 months)
   const {
     start: timelineStart,
     end: timelineEnd,
     months,
-  } = useMemo(() => getTimelineDateRange(), []);
-
-  const overlaps = useMemo(
-    () => calculateOverlaps(blocks, months),
-    [blocks, months]
+  } = useMemo(
+    () => getTimelineDateRangeFromData(blocks, timelineEvents),
+    [blocks, timelineEvents]
   );
 
-  // Update timeline width based on container
+  // Extract maintenance periods per company
+  const maintenancePeriodsByCompany = useMemo(
+    () => extractMaintenancePeriods(blocks),
+    [blocks]
+  );
+
+  // Update timeline width to match container width (no overflow)
   useEffect(() => {
     const updateWidth = () => {
       if (containerRef.current) {
         const containerWidth =
           containerRef.current.getBoundingClientRect().width;
-        setTimelineWidth(Math.max(containerWidth - LABEL_WIDTH, 2400));
+        // Timeline width = container width - label width (200px)
+        setTimelineWidth(containerWidth - LABEL_WIDTH);
       }
     };
 
@@ -148,7 +153,6 @@ export function TimelineView({ sinergias, onBlockClick }: TimelineViewProps) {
   }, [swimLanes, filteredBlocks, focusedDate]);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    setScrollLeft(e.currentTarget.scrollLeft);
     setScrollTop(e.currentTarget.scrollTop);
   };
 
@@ -260,7 +264,7 @@ export function TimelineView({ sinergias, onBlockClick }: TimelineViewProps) {
       <CardContent className="p-0">
         <div
           ref={containerRef}
-          className="relative w-full overflow-auto"
+          className="relative w-full overflow-y-auto overflow-x-hidden"
           style={{ height: "calc(100vh - 300px)", minHeight: 600 }}
           onScroll={handleScroll}
         >
@@ -271,33 +275,19 @@ export function TimelineView({ sinergias, onBlockClick }: TimelineViewProps) {
               timelineStart={timelineStart}
               timelineEnd={timelineEnd}
               width={timelineWidth}
-              scrollLeft={scrollLeft}
               onDateClick={(date) => {
                 setFocusedDate(date);
                 setSelectedDate(date);
-                // Scroll to date if needed
-                const position = calculateDatePosition(
-                  date,
-                  timelineStart,
-                  timelineEnd,
-                  timelineWidth
-                );
-                if (containerRef.current) {
-                  containerRef.current.scrollTo({
-                    left:
-                      position +
-                      LABEL_WIDTH -
-                      containerRef.current.clientWidth / 2,
-                    behavior: "smooth",
-                  });
-                }
               }}
               selectedDate={focusedDate || selectedDate}
             />
           </div>
 
           {/* Event Track - Aligned with TimeAxis */}
-          <div className="sticky top-[80px] z-15 bg-background/95 backdrop-blur-sm border-b">
+          <div
+            className="sticky top-[80px] z-10 bg-background border-b"
+            style={{ height: EVENT_TRACK_HEIGHT }}
+          >
             <TimelineEventTrack
               events={timelineEvents}
               timelineWidth={timelineWidth}
@@ -322,22 +312,35 @@ export function TimelineView({ sinergias, onBlockClick }: TimelineViewProps) {
           </div>
 
           {/* Swim Lanes - Aligned with TimeAxis and EventTrack */}
-          <div className="relative" style={{ minHeight: totalHeight }}>
-            {filteredSwimLanes.map((lane, index) => (
-              <SwimLane
-                key={lane.empresa}
-                empresa={lane.empresa}
-                blocks={lane.blocks}
-                color={lane.color}
-                laneHeight={LANE_HEIGHT}
-                timelineStart={timelineStart}
-                timelineEnd={timelineEnd}
-                timelineWidth={timelineWidth}
-                scrollLeft={scrollLeft}
-                onBlockClick={onBlockClick}
-                onBlockHover={setHoveredBlock}
-              />
-            ))}
+          <div
+            className="relative"
+            style={{ minHeight: totalHeight, marginTop: EVENT_TRACK_HEIGHT }}
+          >
+            {filteredSwimLanes.map((lane, index) => {
+              const maintenancePeriods =
+                maintenancePeriodsByCompany.get(lane.empresa) || [];
+              const periodsWithIds = maintenancePeriods.map((period, idx) => ({
+                id: `maintenance-${lane.empresa}-${idx}`,
+                ...period,
+              }));
+
+              return (
+                <SwimLane
+                  key={lane.empresa}
+                  empresa={lane.empresa}
+                  blocks={lane.blocks}
+                  maintenancePeriods={periodsWithIds}
+                  color={lane.color}
+                  laneHeight={LANE_HEIGHT}
+                  timelineStart={timelineStart}
+                  timelineEnd={timelineEnd}
+                  timelineWidth={timelineWidth}
+                  scrollLeft={0}
+                  onBlockClick={onBlockClick}
+                  onBlockHover={setHoveredBlock}
+                />
+              );
+            })}
 
             {/* Highlight connections between events and blocks */}
             {(hoveredEvent || focusedDate) && (
@@ -363,28 +366,7 @@ export function TimelineView({ sinergias, onBlockClick }: TimelineViewProps) {
               />
             )}
 
-            {/* Overlap Indicators */}
-            {overlaps.map((overlap) => {
-              const position = calculateDatePosition(
-                overlap.date,
-                timelineStart,
-                timelineEnd,
-                timelineWidth
-              );
-
-              return (
-                <OverlapIndicator
-                  key={overlap.id}
-                  overlap={overlap}
-                  position={position}
-                  swimLanes={swimLanes.map((lane, index) => ({
-                    empresa: lane.empresa,
-                    index,
-                  }))}
-                  totalHeight={totalHeight}
-                />
-              );
-            })}
+            {/* Maintenance periods are now shown as horizontal blocks in each swim lane */}
           </div>
 
           {/* Date focus indicator - shows when a date is selected */}

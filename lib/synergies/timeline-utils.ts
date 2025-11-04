@@ -70,7 +70,71 @@ export function groupBlocksByCompany(blocks: TimelineBlock[]): SwimLane[] {
 }
 
 /**
- * Calculate date range for timeline (current - 6 months to + 18 months)
+ * Calculate date range for timeline based on actual data
+ * Returns exactly 12 months starting from the earliest date in the data
+ */
+export function getTimelineDateRangeFromData(
+  blocks: TimelineBlock[],
+  events?: { date: Date }[]
+): {
+  start: Date;
+  end: Date;
+  months: Date[];
+} {
+  // Find the earliest date from blocks and events
+  const allDates: Date[] = [];
+
+  // Get dates from blocks
+  for (const block of blocks) {
+    allDates.push(block.start, block.end);
+  }
+
+  // Get dates from events if provided
+  if (events) {
+    for (const event of events) {
+      allDates.push(event.date);
+    }
+  }
+
+  if (allDates.length === 0) {
+    // Fallback: use current date if no data
+    const currentDate = new Date();
+    const start = startOfMonth(currentDate);
+    const end = endOfMonth(addMonths(start, 11));
+
+    const months: Date[] = [];
+    let current = startOfMonth(start);
+    for (let i = 0; i < 12; i++) {
+      months.push(new Date(current));
+      current = startOfMonth(addMonths(current, 1));
+    }
+
+    return { start, end, months };
+  }
+
+  // Find earliest date
+  const earliestDate = new Date(Math.min(...allDates.map((d) => d.getTime())));
+
+  // Start from the beginning of the month containing the earliest date
+  const start = startOfMonth(earliestDate);
+
+  // End exactly 12 months later
+  const end = endOfMonth(addMonths(start, 11));
+
+  // Generate 12 months
+  const months: Date[] = [];
+  let current = startOfMonth(start);
+  for (let i = 0; i < 12; i++) {
+    months.push(new Date(current));
+    current = startOfMonth(addMonths(current, 1));
+  }
+
+  return { start, end, months };
+}
+
+/**
+ * Legacy function - kept for backward compatibility but deprecated
+ * @deprecated Use getTimelineDateRangeFromData instead
  */
 export function getTimelineDateRange(currentDate: Date = new Date()): {
   start: Date;
@@ -92,71 +156,77 @@ export function getTimelineDateRange(currentDate: Date = new Date()): {
 }
 
 /**
- * Calculate overlap indicators - dates where multiple companies have synergies
+ * Extract maintenance periods from synergy blocks grouped by company
+ * Returns periods where each company has active maintenance/delivery windows
  */
-export function calculateOverlaps(
-  blocks: TimelineBlock[],
-  months: Date[]
-): OverlapIndicator[] {
-  const overlaps: OverlapIndicator[] = [];
-  const monthOverlaps = new Map<string, Map<string, Set<string>>>(); // month -> empresa -> sinergias
+export function extractMaintenancePeriods(
+  blocks: TimelineBlock[]
+): Map<
+  string,
+  Array<{ start: Date; end: Date; planta?: string; unidad?: string }>
+> {
+  const periodsByCompany = new Map<
+    string,
+    Array<{ start: Date; end: Date; planta?: string; unidad?: string }>
+  >();
 
-  // Group blocks by month
-  for (const month of months) {
-    const monthKey = format(month, "yyyy-MM");
-    const overlapsInMonth = new Map<string, Set<string>>();
-
-    for (const block of blocks) {
-      const blockStart = startOfMonth(block.start);
-      const blockEnd = endOfMonth(block.end);
-
-      // Check if block overlaps with this month
-      if (month >= blockStart && month <= blockEnd) {
-        if (!overlapsInMonth.has(block.empresa)) {
-          overlapsInMonth.set(block.empresa, new Set());
-        }
-        overlapsInMonth.get(block.empresa)!.add(block.sinergiaId);
-      }
+  // Group blocks by company and merge overlapping periods
+  for (const block of blocks) {
+    if (!periodsByCompany.has(block.empresa)) {
+      periodsByCompany.set(block.empresa, []);
     }
 
-    // If 2+ companies have synergies in this month, it's an overlap
-    if (overlapsInMonth.size >= 2) {
-      const empresas = Array.from(overlapsInMonth.keys());
-      const allSinergias = new Set<string>();
-      let totalVolumen = 0;
-      let totalAhorro = 0;
-
-      for (const [empresa, sinergias] of overlapsInMonth.entries()) {
-        for (const sinergiaId of sinergias) {
-          allSinergias.add(sinergiaId);
-
-          // Find the block to get volume and savings
-          const block = blocks.find(
-            (b) => b.sinergiaId === sinergiaId && b.empresa === empresa
-          );
-          if (block) {
-            totalVolumen += block.volumen;
-            totalAhorro += block.ahorro || 0;
-          }
-        }
-      }
-
-      overlaps.push({
-        id: `overlap-${monthKey}`,
-        date: month,
-        empresas,
-        sinergias: Array.from(allSinergias),
-        totalVolumen,
-        totalAhorro,
-      });
-    }
+    const periods = periodsByCompany.get(block.empresa)!;
+    periods.push({
+      start: block.start,
+      end: block.end,
+    });
   }
 
-  return overlaps;
+  // Merge overlapping periods for each company
+  const mergedPeriods = new Map<
+    string,
+    Array<{ start: Date; end: Date; planta?: string; unidad?: string }>
+  >();
+
+  for (const [empresa, periods] of periodsByCompany.entries()) {
+    // Sort by start date
+    const sorted = periods.sort(
+      (a, b) => a.start.getTime() - b.start.getTime()
+    );
+
+    // Merge overlapping periods
+    const merged: Array<{
+      start: Date;
+      end: Date;
+      planta?: string;
+      unidad?: string;
+    }> = [];
+    for (const period of sorted) {
+      if (merged.length === 0) {
+        merged.push({ ...period });
+      } else {
+        const last = merged[merged.length - 1]!;
+        // If periods overlap or are adjacent (within 1 day), merge them
+        if (
+          period.start <= new Date(last.end.getTime() + 24 * 60 * 60 * 1000)
+        ) {
+          last.end = period.end > last.end ? period.end : last.end;
+        } else {
+          merged.push({ ...period });
+        }
+      }
+    }
+
+    mergedPeriods.set(empresa, merged);
+  }
+
+  return mergedPeriods;
 }
 
 /**
  * Calculate pixel position for a date within the timeline
+ * Uses millisecond precision for accurate positioning
  */
 export function calculateDatePosition(
   date: Date,
@@ -164,9 +234,16 @@ export function calculateDatePosition(
   timelineEnd: Date,
   timelineWidth: number
 ): number {
-  const totalDays = differenceInDays(timelineEnd, timelineStart);
-  const daysFromStart = differenceInDays(date, timelineStart);
-  return (daysFromStart / totalDays) * timelineWidth;
+  // Use millisecond precision for accurate positioning
+  const totalMs = timelineEnd.getTime() - timelineStart.getTime();
+  const msFromStart = date.getTime() - timelineStart.getTime();
+
+  // Handle edge cases
+  if (totalMs <= 0) return 0;
+  if (msFromStart < 0) return 0;
+  if (msFromStart > totalMs) return timelineWidth;
+
+  return (msFromStart / totalMs) * timelineWidth;
 }
 
 /**

@@ -39,7 +39,7 @@ export function SynergyBlock({
 
   return (
     <motion.div
-      className="absolute cursor-pointer group"
+      className="absolute cursor-pointer group z-50"
       style={{
         left: position,
         top: blockY,
@@ -48,7 +48,7 @@ export function SynergyBlock({
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      whileHover={{ scale: 1.05, zIndex: 10 }}
+      whileHover={{ scale: 1.05, zIndex: 200 }}
       onClick={onClick}
       onMouseEnter={() => onHover?.(true)}
       onMouseLeave={() => onHover?.(false)}
