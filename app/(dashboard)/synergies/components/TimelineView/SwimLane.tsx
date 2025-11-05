@@ -90,7 +90,7 @@ export function SwimLane({
 
       {/* Timeline blocks */}
       <div
-        className="absolute border-l-2 border-cyan-500 top-0 left-[200px] h-full z-10 pointer-events-auto"
+        className="absolute top-0 left-[200px] h-full z-10 pointer-events-auto"
         style={{
           width: timelineWidth,
         }}

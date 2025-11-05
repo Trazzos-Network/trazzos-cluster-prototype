@@ -11,8 +11,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { COMPREHENSIVE_SAMPLE_2026_H1 } from "@/data/sample_data_extended";
-import { SAMPLE_OUTPUT } from "@/data/sample_data";
-import { EstadoSinergia, Criticidad } from "@/types/models";
+import {
+  EstadoSinergia,
+  Criticidad,
+  LeaderboardProveedor,
+} from "@/types/models";
 import { useSynergiesStore } from "@/stores/synergies-store";
 import {
   TrendingUp,
@@ -29,17 +32,21 @@ export default function HomePage() {
   // Get synergies from store
   const sinergias = useSynergiesStore((state) => state.sinergias);
 
-  // KPIs is an array in extended data, get the latest one, or use single object from basic data
+  // KPIs is an array in extended data, get the latest one, or use single object
   const kpis = Array.isArray(COMPREHENSIVE_SAMPLE_2026_H1.kpis)
     ? COMPREHENSIVE_SAMPLE_2026_H1.kpis[
         COMPREHENSIVE_SAMPLE_2026_H1.kpis.length - 1
       ]
-    : COMPREHENSIVE_SAMPLE_2026_H1.kpis || SAMPLE_OUTPUT.kpis;
-  const leaderboard =
-    COMPREHENSIVE_SAMPLE_2026_H1.leaderboard || SAMPLE_OUTPUT.leaderboard;
-  const paradas = COMPREHENSIVE_SAMPLE_2026_H1.paradas || SAMPLE_OUTPUT.paradas;
+    : COMPREHENSIVE_SAMPLE_2026_H1.kpis;
+  const paradas = COMPREHENSIVE_SAMPLE_2026_H1.paradas || [];
   const paradasCount = paradas.length;
   const empresasParticipantes = kpis.empresas_participantes;
+  // Get leaderboard from extended data
+  const leaderboard: LeaderboardProveedor[] = (
+    "leaderboard" in COMPREHENSIVE_SAMPLE_2026_H1
+      ? COMPREHENSIVE_SAMPLE_2026_H1.leaderboard
+      : []
+  ) as LeaderboardProveedor[];
 
   // Calculate active synergies from store using useMemo to avoid infinite loops
   const sinergiasCerradas = useMemo(
@@ -470,7 +477,7 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {leaderboard.map((prov) => (
+                {leaderboard.map((prov: LeaderboardProveedor) => (
                   <div
                     key={prov.proveedor}
                     className="rounded-lg border p-4 space-y-2"

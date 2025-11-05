@@ -77,12 +77,33 @@ export function OfferEvaluationPanel({
     () => synergy.rfp?.ofertas || [],
     [synergy.rfp?.ofertas]
   );
-  const [ponderadores, setPonderadores] = useState({
-    peso_precio: 0.6,
-    peso_lead: 0.25,
-    peso_sla: 0.15,
+  // Initial weights (will be normalized to sum to 0.95, leaving 0.05 for certifications)
+  const [rawWeights, setRawWeights] = useState({
+    peso_precio: 60,
+    peso_lead: 25,
+    peso_sla: 15,
   });
   const [justificacion, setJustificacion] = useState("");
+
+  // Normalize weights so they sum to 0.95 (leaving 0.05 for certifications)
+  const ponderadores = useMemo(() => {
+    const total =
+      rawWeights.peso_precio + rawWeights.peso_lead + rawWeights.peso_sla;
+    if (total === 0) {
+      // Fallback if all are zero
+      return {
+        peso_precio: 0.95 * (60 / 100), // 0.57
+        peso_lead: 0.95 * (25 / 100), // 0.2375
+        peso_sla: 0.95 * (15 / 100), // 0.1425
+      };
+    }
+    // Normalize to sum to 0.95
+    return {
+      peso_precio: (rawWeights.peso_precio / total) * 0.95,
+      peso_lead: (rawWeights.peso_lead / total) * 0.95,
+      peso_sla: (rawWeights.peso_sla / total) * 0.95,
+    };
+  }, [rawWeights]);
 
   // Debug logging
   useEffect(() => {
@@ -269,7 +290,7 @@ export function OfferEvaluationPanel({
                 <div className="grid grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="peso_precio">
-                      Peso Precio: {(ponderadores.peso_precio * 100).toFixed(0)}
+                      Peso Precio: {(ponderadores.peso_precio * 100).toFixed(1)}
                       %
                     </Label>
                     <Input
@@ -278,20 +299,21 @@ export function OfferEvaluationPanel({
                       min="0"
                       max="100"
                       step="5"
-                      value={ponderadores.peso_precio * 100}
-                      onChange={(e) =>
-                        setPonderadores({
-                          ...ponderadores,
-                          peso_precio: parseInt(e.target.value) / 100,
-                        })
-                      }
+                      value={rawWeights.peso_precio}
+                      onChange={(e) => {
+                        const newValue = parseInt(e.target.value);
+                        setRawWeights({
+                          ...rawWeights,
+                          peso_precio: newValue,
+                        });
+                      }}
                       className="mt-2"
                     />
                   </div>
                   <div>
                     <Label htmlFor="peso_lead">
                       Peso Lead Time:{" "}
-                      {(ponderadores.peso_lead * 100).toFixed(0)}%
+                      {(ponderadores.peso_lead * 100).toFixed(1)}%
                     </Label>
                     <Input
                       id="peso_lead"
@@ -299,19 +321,20 @@ export function OfferEvaluationPanel({
                       min="0"
                       max="100"
                       step="5"
-                      value={ponderadores.peso_lead * 100}
-                      onChange={(e) =>
-                        setPonderadores({
-                          ...ponderadores,
-                          peso_lead: parseInt(e.target.value) / 100,
-                        })
-                      }
+                      value={rawWeights.peso_lead}
+                      onChange={(e) => {
+                        const newValue = parseInt(e.target.value);
+                        setRawWeights({
+                          ...rawWeights,
+                          peso_lead: newValue,
+                        });
+                      }}
                       className="mt-2"
                     />
                   </div>
                   <div>
                     <Label htmlFor="peso_sla">
-                      Peso SLA: {(ponderadores.peso_sla * 100).toFixed(0)}%
+                      Peso SLA: {(ponderadores.peso_sla * 100).toFixed(1)}%
                     </Label>
                     <Input
                       id="peso_sla"
@@ -319,16 +342,37 @@ export function OfferEvaluationPanel({
                       min="0"
                       max="100"
                       step="5"
-                      value={ponderadores.peso_sla * 100}
-                      onChange={(e) =>
-                        setPonderadores({
-                          ...ponderadores,
-                          peso_sla: parseInt(e.target.value) / 100,
-                        })
-                      }
+                      value={rawWeights.peso_sla}
+                      onChange={(e) => {
+                        const newValue = parseInt(e.target.value);
+                        setRawWeights({
+                          ...rawWeights,
+                          peso_sla: newValue,
+                        });
+                      }}
                       className="mt-2"
                     />
                   </div>
+                </div>
+                <div className="mt-4 pt-4 border-t">
+                  <p className="text-sm text-muted-foreground">
+                    <strong>Total ponderadores:</strong>{" "}
+                    {(
+                      (ponderadores.peso_precio +
+                        ponderadores.peso_lead +
+                        ponderadores.peso_sla) *
+                      100
+                    ).toFixed(1)}
+                    % (Criterios principales) + 5.0% (Certificaciones) ={" "}
+                    {(
+                      (ponderadores.peso_precio +
+                        ponderadores.peso_lead +
+                        ponderadores.peso_sla +
+                        0.05) *
+                      100
+                    ).toFixed(1)}
+                    %
+                  </p>
                 </div>
               </CardContent>
             </Card>

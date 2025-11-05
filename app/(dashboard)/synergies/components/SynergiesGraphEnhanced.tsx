@@ -66,7 +66,7 @@ export function SynergiesGraphEnhanced({
   const [selectedSynergy, setSelectedSynergy] =
     useState<SinergiaDetectada | null>(null);
   const [detailPanelOpen, setDetailPanelOpen] = useState(false);
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(0.75);
   const [enhancementsEnabled, setEnhancementsEnabled] = useState(true);
   const [selectedNodes, setSelectedNodes] = useState<Set<string>>(new Set());
   const [boxSelectEnabled, setBoxSelectEnabled] = useState(false);
@@ -151,7 +151,7 @@ export function SynergiesGraphEnhanced({
 
   const handleZoomIn = () => setZoom((z) => Math.min(z + 0.2, 3));
   const handleZoomOut = () => setZoom((z) => Math.max(z - 0.2, 0.5));
-  const handleResetZoom = () => setZoom(1);
+  const handleResetZoom = () => setZoom(0.75);
 
   const handleNodeClick = (node: GraphNode, event?: React.MouseEvent) => {
     // Shift + Click: Multi-select or comparison mode

@@ -217,10 +217,12 @@ export const CRITICIDAD_COLORS: Record<Criticidad, string> = {
 
 // CSS variable references for companies (for SVG fill/stroke)
 export const COMPANY_COLORS: Record<string, string> = {
-  "Ecopetrol Refinería": "var(--color-primary)",
-  "Monómeros Colombo Venezolanos": "var(--color-primary)",
-  "Argos - Cementos": "var(--color-primary)",
-  "Yara Colombia": "var(--color-primary)",
+  "Argos - Cementos Caribe": "var(--color-chart-1)",
+  "Ajover S.A.": "var(--color-chart-2)",
+  "Yara Colombia": "var(--color-chart-3)",
+  "Cabot Colombiana": "var(--color-chart-4)",
+  "Reficar (Ecopetrol)": "var(--color-chart-5)",
+  "Essentía IC": "var(--color-dataviz-0)",
 };
 
 export const MATERIAL_COLORS: Record<string, string> = {

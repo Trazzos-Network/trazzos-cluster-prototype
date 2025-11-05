@@ -1,20 +1,31 @@
 "use client";
 
 import * as React from "react";
-import { Home, Settings, ChevronUp, User2, Network, ShoppingBag, Users } from "lucide-react";
+import {
+  Home,
+  Settings,
+  ChevronUp,
+  User2,
+  Network,
+  ShoppingBag,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarHeader,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   DropdownMenu,
@@ -55,9 +66,33 @@ const items = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const { state } = useSidebar();
 
   return (
     <Sidebar collapsible="icon">
+      <SidebarHeader>
+        <div className="flex items-center justify-start h-12 px-2">
+          {state === "expanded" ? (
+            <Image
+              src="/logo.svg"
+              alt="Trazzos Logo"
+              width={132}
+              height={24}
+              className="object-contain"
+              priority
+            />
+          ) : (
+            <Image
+              src="/icon.svg"
+              alt="Trazzos Icon"
+              width={32}
+              height={32}
+              className="h-8 w-8 object-contain"
+              priority
+            />
+          )}
+        </div>
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Dashboard</SidebarGroupLabel>

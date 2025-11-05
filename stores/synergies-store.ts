@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { COMPREHENSIVE_SAMPLE_2026_H1 } from "@/data/sample_data_extended";
-import { SAMPLE_OUTPUT } from "@/data/sample_data";
 import {
   SinergiaDetectada,
   EstadoSinergia,
@@ -72,22 +71,19 @@ export const useSynergiesStore = create<SynergiesStore>((set, get) => ({
 
   // Initialize from sample data
   initialize: () => {
-    const allRFPs = COMPREHENSIVE_SAMPLE_2026_H1.rfps || [];
-    const allSynergies = [
-      ...COMPREHENSIVE_SAMPLE_2026_H1.sinergias,
-      ...(SAMPLE_OUTPUT.sinergias || []),
-    ];
-    const allDecisions = COMPREHENSIVE_SAMPLE_2026_H1.decisiones || [];
+    const allRFPs = ("rfps" in COMPREHENSIVE_SAMPLE_2026_H1 ? COMPREHENSIVE_SAMPLE_2026_H1.rfps : []) as RFPConjunta[];
+    const allSynergies = COMPREHENSIVE_SAMPLE_2026_H1.sinergias || [];
+    const allDecisions = ("decisiones" in COMPREHENSIVE_SAMPLE_2026_H1 ? COMPREHENSIVE_SAMPLE_2026_H1.decisiones : []) as DecisionComite[];
 
     // Link RFPs to synergies
     const synergiesWithRFP = allSynergies.map((synergy) => {
-      const rfp = allRFPs.find((r) => r.sinergia_id === synergy.id);
+      const rfp = allRFPs.find((r: RFPConjunta) => r.sinergia_id === synergy.id);
       return rfp ? { ...synergy, rfp } : synergy;
     });
 
     // Load existing POs from decisions
     const existingPOs: PO[] = [];
-    allDecisions.forEach((decision) => {
+    allDecisions.forEach((decision: DecisionComite) => {
       if (
         (decision.accion === "aprobar" || decision.accion === "cerrar") &&
         decision.po_numero

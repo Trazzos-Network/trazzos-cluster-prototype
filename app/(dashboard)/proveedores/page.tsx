@@ -9,16 +9,16 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { SAMPLE_OUTPUT } from "@/data/sample_data";
-import {
-  Building2,
-  Search,
-  Package,
-  CheckCircle,
-} from "lucide-react";
+import { COMPREHENSIVE_SAMPLE_2026_H1 } from "@/data/sample_data_extended";
+import { LeaderboardProveedor } from "@/types/models";
+import { Building2, Search, Package, CheckCircle } from "lucide-react";
 
 export default function ProveedoresPage() {
-  const leaderboard = SAMPLE_OUTPUT.leaderboard;
+  // Get leaderboard from extended data
+  const leaderboard: LeaderboardProveedor[] = 
+    ("leaderboard" in COMPREHENSIVE_SAMPLE_2026_H1 
+      ? COMPREHENSIVE_SAMPLE_2026_H1.leaderboard 
+      : []) as LeaderboardProveedor[];
 
   return (
     <div className="space-y-6">
@@ -55,7 +55,7 @@ export default function ProveedoresPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {leaderboard.map((prov) => (
+            {leaderboard.map((prov: LeaderboardProveedor) => (
               <div
                 key={prov.proveedor}
                 className="rounded-lg p-4 space-y-2 cursor-pointer border-border hover:border hover:border-primary hover:bg-accent/10 transition-colors"
@@ -102,7 +102,7 @@ export default function ProveedoresPage() {
                 </div>
                 {prov.certificaciones && prov.certificaciones.length > 0 && (
                   <div className="flex flex-wrap gap-1 pt-2">
-                    {prov.certificaciones.map((cert, idx) => (
+                    {prov.certificaciones.map((cert: string, idx: number) => (
                       <Badge key={idx} variant="outline" className="text-xs">
                         {cert}
                       </Badge>
@@ -154,7 +154,7 @@ export default function ProveedoresPage() {
             <div className="text-2xl font-bold">
               {(
                 leaderboard.reduce(
-                  (sum, p) => sum + p.volumen_total_adjudicado,
+                  (sum, p: LeaderboardProveedor) => sum + p.volumen_total_adjudicado,
                   0
                 ) / 1000
               ).toFixed(0)}
