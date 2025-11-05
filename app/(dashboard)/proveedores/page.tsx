@@ -12,13 +12,27 @@ import { Input } from "@/components/ui/input";
 import { COMPREHENSIVE_SAMPLE_2026_H1 } from "@/data/sample_data_extended";
 import { LeaderboardProveedor } from "@/types/models";
 import { Building2, Search, Package, CheckCircle } from "lucide-react";
+import Link from "next/link";
+
+/**
+ * Encode supplier name to URL-safe format (slug)
+ */
+function encodeSupplierName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
 
 export default function ProveedoresPage() {
   // Get leaderboard from extended data
-  const leaderboard: LeaderboardProveedor[] = 
-    ("leaderboard" in COMPREHENSIVE_SAMPLE_2026_H1 
-      ? COMPREHENSIVE_SAMPLE_2026_H1.leaderboard 
-      : []) as LeaderboardProveedor[];
+  const leaderboard: LeaderboardProveedor[] = (
+    "leaderboard" in COMPREHENSIVE_SAMPLE_2026_H1
+      ? COMPREHENSIVE_SAMPLE_2026_H1.leaderboard
+      : []
+  ) as LeaderboardProveedor[];
 
   return (
     <div className="space-y-6">
@@ -56,9 +70,10 @@ export default function ProveedoresPage() {
         <CardContent>
           <div className="space-y-3">
             {leaderboard.map((prov: LeaderboardProveedor) => (
-              <div
+              <Link
                 key={prov.proveedor}
-                className="rounded-lg p-4 space-y-2 cursor-pointer border-border hover:border hover:border-primary hover:bg-accent/10 transition-colors"
+                href={`/proveedores/${encodeSupplierName(prov.proveedor)}`}
+                className="block rounded-lg p-4 space-y-2 cursor-pointer border border-border hover:border-primary hover:bg-accent/10 transition-colors"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -109,7 +124,7 @@ export default function ProveedoresPage() {
                     ))}
                   </div>
                 )}
-              </div>
+              </Link>
             ))}
           </div>
         </CardContent>
@@ -154,7 +169,8 @@ export default function ProveedoresPage() {
             <div className="text-2xl font-bold">
               {(
                 leaderboard.reduce(
-                  (sum, p: LeaderboardProveedor) => sum + p.volumen_total_adjudicado,
+                  (sum, p: LeaderboardProveedor) =>
+                    sum + p.volumen_total_adjudicado,
                   0
                 ) / 1000
               ).toFixed(0)}
